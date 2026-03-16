@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ClassNotes ✏️</title>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0e0e14;
+    --surface: #16161f;
+    --border: #2a2a3a;
+    --accent1: #f9e04b;
+    --accent2: #ff6b6b;
+    --accent3: #6bffb8;
+    --accent4: #6ba8ff;
+    --accent5: #ff9f6b;
+    --accent6: #d06bff;
+    --text: #f0f0f8;
+    --muted: #7a7a9a;
+    --input-bg: #1e1e2e;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Animated starfield background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      radial-gradient(1px 1px at 10% 20%, rgba(249,224,75,0.3) 0%, transparent 100%),
+      radial-gradient(1px 1px at 80% 10%, rgba(107,168,255,0.3) 0%, transparent 100%),
+      radial-gradient(1px 1px at 50% 80%, rgba(107,255,184,0.2) 0%, transparent 100%),
+      radial-gradient(1px 1px at 25% 60%, rgba(255,107,107,0.2) 0%, transparent 100%),
+      radial-gradient(1px 1px at 90% 50%, rgba(208,107,255,0.2) 0%, transparent 100%),
+      radial-gradient(2px 2px at 40% 30%, rgba(249,224,75,0.15) 0%, transparent 100%),
+      radial-gradient(1px 1px at 65% 45%, rgba(107,255,184,0.15) 0%, transparent 100%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Header */
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(14,14,20,0.85);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .logo {
+    font-family: 'Caveat', cursive;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--accent1);
+    letter-spacing: -0.5px;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .logo span { color: var(--text); }
+
+  .note-count {
+    font-size: 0.8rem;
+    color: var(--muted);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 4px 12px;
+    border-radius: 99px;
+  }
+
+  .note-count b { color: var(--accent1); }
+
+  /* Main layout */
+  main {
+    position: relative;
+    z-index: 1;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+
+  /* Input section */
+  .input-section {
+    background: var(--input-bg);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 1.5rem;
+    margin-bottom: 2.5rem;
+    transition: border-color 0.3s, box-shadow 0.3s;
+    animation: slideDown 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .input-section:focus-within {
+    border-color: var(--accent1);
+    box-shadow: 0 0 0 3px rgba(249,224,75,0.08), 0 8px 40px rgba(0,0,0,0.4);
+  }
+
+  .input-row {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-end;
+  }
+
+  .input-col { flex: 1; }
+
+  .input-label {
+    display: block;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.5rem;
+  }
+
+  .topic-input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    padding: 6px 0;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .topic-input:focus { border-color: var(--accent1); }
+  .topic-input::placeholder { color: var(--muted); }
+
+  .note-textarea {
+    width: 100%;
+    background: transparent;
+    border: none;
+    color: var(--text);
+    font-family: 'Caveat', cursive;
+    font-size: 1.2rem;
+    line-height: 1.6;
+    padding: 8px 0;
+    outline: none;
+    resize: none;
+    min-height: 80px;
+    margin-top: 0.8rem;
+    display: block;
+  }
+
+  .note-textarea::placeholder { color: var(--muted); }
+
+  /* Color picker */
+  .color-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .color-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-right: 0.25rem;
+  }
+
+  .color-dot {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: transform 0.2s, border-color 0.2s;
+    flex-shrink: 0;
+  }
+
+  .color-dot:hover { transform: scale(1.2); }
+  .color-dot.active { border-color: white; transform: scale(1.25); }
+
+  /* Add button */
+  .add-btn {
+    background: var(--accent1);
+    color: #0e0e14;
+    border: none;
+    border-radius: 12px;
+    padding: 0 1.5rem;
+    height: 44px;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .add-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(249,224,75,0.3);
+  }
+
+  .add-btn:active { transform: translateY(0); }
+
+  /* Toolbar */
+  .toolbar {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+  }
+
+  .search-wrap {
+    position: relative;
+    flex: 1;
+    min-width: 200px;
+  }
+
+  .search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--muted);
+    font-size: 0.9rem;
+    pointer-events: none;
+  }
+
+  .search-input {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    padding: 9px 12px 9px 36px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .search-input:focus { border-color: var(--accent4); }
+  .search-input::placeholder { color: var(--muted); }
+
+  .sort-btn, .clear-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.8rem;
+    padding: 9px 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .sort-btn:hover { border-color: var(--accent4); color: var(--accent4); }
+  .clear-btn:hover { border-color: var(--accent2); color: var(--accent2); }
+
+  /* Notes grid */
+  .notes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 1.2rem;
+    align-items: start;
+  }
+
+  /* Sticky note */
+  .note-card {
+    border-radius: 16px;
+    padding: 1.2rem;
+    position: relative;
+    cursor: default;
+    animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    transform-origin: center bottom;
+    transition: transform 0.25s cubic-bezier(0.34,1.4,0.64,1), box-shadow 0.25s;
+    overflow: hidden;
+  }
+
+  .note-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 16px 16px 0 0;
+  }
+
+  /* Tape strip effect */
+  .note-card::after {
+    content: '';
+    position: absolute;
+    top: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 50px;
+    height: 18px;
+    background: rgba(255,255,255,0.12);
+    border-radius: 3px;
+    backdrop-filter: blur(4px);
+  }
+
+  .note-card:hover {
+    transform: translateY(-6px) rotate(0.5deg);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    z-index: 10;
+  }
+
+  .note-card.removing {
+    animation: popOut 0.35s cubic-bezier(0.36,0.07,0.19,0.97) forwards;
+  }
+
+  /* Note header */
+  .note-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 0.7rem;
+    gap: 0.5rem;
+  }
+
+  .note-topic {
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    background: rgba(0,0,0,0.2);
+    padding: 3px 8px;
+    border-radius: 6px;
+    max-width: 80%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: rgba(0,0,0,0.7);
+  }
+
+  .note-actions {
+    display: flex;
+    gap: 4px;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  .note-card:hover .note-actions { opacity: 1; }
+
+  .note-action-btn {
+    background: rgba(0,0,0,0.15);
+    border: none;
+    border-radius: 6px;
+    width: 26px;
+    height: 26px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    color: rgba(0,0,0,0.6);
+    transition: background 0.15s;
+  }
+
+  .note-action-btn:hover { background: rgba(0,0,0,0.25); }
+
+  /* Note content */
+  .note-content {
+    font-family: 'Caveat', cursive;
+    font-size: 1.15rem;
+    line-height: 1.55;
+    color: rgba(0,0,0,0.82);
+    word-break: break-word;
+    white-space: pre-wrap;
+  }
+
+  /* Note footer */
+  .note-footer {
+    margin-top: 0.9rem;
+    font-size: 0.7rem;
+    color: rgba(0,0,0,0.45);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  /* Editing state */
+  .note-edit-area {
+    font-family: 'Caveat', cursive;
+    font-size: 1.15rem;
+    background: transparent;
+    border: none;
+    border-bottom: 1px dashed rgba(0,0,0,0.3);
+    color: rgba(0,0,0,0.82);
+    width: 100%;
+    resize: none;
+    outline: none;
+    line-height: 1.55;
+    min-height: 60px;
+  }
+
+  /* Empty state */
+  .empty-state {
+    grid-column: 1/-1;
+    text-align: center;
+    padding: 4rem 2rem;
+    animation: fadeIn 0.5s ease;
+  }
+
+  .empty-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    display: block;
+    animation: float 3s ease-in-out infinite;
+  }
+
+  .empty-title {
+    font-family: 'Caveat', cursive;
+    font-size: 1.8rem;
+    color: var(--muted);
+    margin-bottom: 0.5rem;
+  }
+
+  .empty-sub {
+    font-size: 0.85rem;
+    color: var(--muted);
+    opacity: 0.6;
+  }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 10px 20px;
+    border-radius: 99px;
+    font-size: 0.85rem;
+    z-index: 999;
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    white-space: nowrap;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+  }
+
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* Animations */
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes popIn {
+    0%   { opacity: 0; transform: scale(0.7) rotate(-3deg); }
+    100% { opacity: 1; transform: scale(1) rotate(0deg); }
+  }
+
+  @keyframes popOut {
+    0%   { opacity: 1; transform: scale(1); }
+    60%  { opacity: 0.5; transform: scale(1.05) rotate(2deg); }
+    100% { opacity: 0; transform: scale(0.5) rotate(-5deg); }
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; } to { opacity: 1; }
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50%       { transform: translateY(-12px); }
+  }
+
+  /* Responsive */
+  @media (max-width: 600px) {
+    main { padding: 1rem; }
+    .input-row { flex-direction: column; }
+    .add-btn { width: 100%; justify-content: center; }
+    header { padding: 0 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">📒 Class<span>Notes</span></div>
+  <div class="note-count">Notes: <b id="noteCountBadge">0</b></div>
+</header>
+
+<main>
+  <!-- Input Section -->
+  <div class="input-section">
+    <div class="input-row">
+      <div class="input-col">
+        <label class="input-label">Topic / Subject</label>
+        <input class="topic-input" id="topicInput" type="text" placeholder="e.g. Physics — Newton's Laws" maxlength="60">
+        <textarea class="note-textarea" id="noteInput" placeholder="📝  Type your note here... (Shift+Enter for new line, Enter to add)" rows="3"></textarea>
+      </div>
+      <button class="add-btn" id="addBtn" onclick="addNote()">
+        <span>＋</span> Add Note
+      </button>
+    </div>
+
+    <div class="color-row">
+      <span class="color-label">Color</span>
+      <div class="color-dot active" style="background:#f9e04b" data-color="#f9e04b" onclick="selectColor(this)" title="Yellow"></div>
+      <div class="color-dot" style="background:#ffb3b3" data-color="#ffb3b3" onclick="selectColor(this)" title="Pink"></div>
+      <div class="color-dot" style="background:#b3ffd4" data-color="#b3ffd4" onclick="selectColor(this)" title="Mint"></div>
+      <div class="color-dot" style="background:#b3d9ff" data-color="#b3d9ff" onclick="selectColor(this)" title="Blue"></div>
+      <div class="color-dot" style="background:#e5b3ff" data-color="#e5b3ff" onclick="selectColor(this)" title="Purple"></div>
+      <div class="color-dot" style="background:#ffd4b3" data-color="#ffd4b3" onclick="selectColor(this)" title="Peach"></div>
+      <div class="color-dot" style="background:#d4f5f5" data-color="#d4f5f5" onclick="selectColor(this)" title="Teal"></div>
+      <div class="color-dot" style="background:#fff4b3" data-color="#fff4b3" onclick="selectColor(this)" title="Cream"></div>
+    </div>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input class="search-input" id="searchInput" type="text" placeholder="Search notes…" oninput="renderNotes()">
+    </div>
+    <button class="sort-btn" onclick="toggleSort()">⇅ <span id="sortLabel">Newest</span></button>
+    <button class="clear-btn" onclick="clearAll()">🗑 Clear All</button>
+  </div>
+
+  <!-- Notes Grid -->
+  <div class="notes-grid" id="notesGrid"></div>
+</main>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+  // ─── State ──────────────────────────────────────────────────────────────────
+  let notes = JSON.parse(localStorage.getItem('classnotes_v2') || '[]');
+  let selectedColor = '#f9e04b';
+  let sortNewest = true;
+
+  // ─── Helpers ────────────────────────────────────────────────────────────────
+  function saveNotes() {
+    localStorage.setItem('classnotes_v2', JSON.stringify(notes));
+  }
+
+  function showToast(msg, emoji = '✅') {
+    const t = document.getElementById('toast');
+    t.textContent = emoji + '  ' + msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2200);
+  }
+
+  function formatTime(ts) {
+    const d = new Date(ts);
+    return d.toLocaleDateString(undefined, { month:'short', day:'numeric' }) +
+           ' · ' + d.toLocaleTimeString(undefined, { hour:'2-digit', minute:'2-digit' });
+  }
+
+  function selectColor(el) {
+    document.querySelectorAll('.color-dot').forEach(d => d.classList.remove('active'));
+    el.classList.add('active');
+    selectedColor = el.dataset.color;
+  }
+
+  function toggleSort() {
+    sortNewest = !sortNewest;
+    document.getElementById('sortLabel').textContent = sortNewest ? 'Newest' : 'Oldest';
+    renderNotes();
+  }
+
+  // ─── Add note ───────────────────────────────────────────────────────────────
+  function addNote() {
+    const text = document.getElementById('noteInput').value.trim();
+    const topic = document.getElementById('topicInput').value.trim();
+    if (!text) {
+      document.getElementById('noteInput').focus();
+      showToast('Write something first!', '⚠️');
+      return;
+    }
+    const note = {
+      id: Date.now(),
+      text,
+      topic: topic || 'General',
+      color: selectedColor,
+      ts: Date.now()
+    };
+    notes.unshift(note);
+    saveNotes();
+    document.getElementById('noteInput').value = '';
+    renderNotes();
+    showToast('Note added!', '📌');
+  }
+
+  // ─── Delete note ────────────────────────────────────────────────────────────
+  function deleteNote(id) {
+    const el = document.getElementById('note-' + id);
+    if (el) {
+      el.classList.add('removing');
+      el.addEventListener('animationend', () => {
+        notes = notes.filter(n => n.id !== id);
+        saveNotes();
+        renderNotes();
+      }, { once: true });
+    }
+  }
+
+  // ─── Edit note ──────────────────────────────────────────────────────────────
+  function startEdit(id) {
+    const note = notes.find(n => n.id === id);
+    if (!note) return;
+    const card = document.getElementById('note-' + id);
+    const contentEl = card.querySelector('.note-content');
+    const textarea = document.createElement('textarea');
+    textarea.className = 'note-edit-area';
+    textarea.value = note.text;
+    textarea.rows = 4;
+    contentEl.replaceWith(textarea);
+    textarea.focus();
+
+    function finishEdit() {
+      const newText = textarea.value.trim();
+      if (newText) note.text = newText;
+      saveNotes();
+      renderNotes();
+      showToast('Note updated!', '✏️');
+    }
+
+    textarea.addEventListener('blur', finishEdit);
+    textarea.addEventListener('keydown', e => {
+      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); textarea.blur(); }
+      if (e.key === 'Escape') { textarea.removeEventListener('blur', finishEdit); renderNotes(); }
+    });
+  }
+
+  // ─── Copy note ──────────────────────────────────────────────────────────────
+  function copyNote(id) {
+    const note = notes.find(n => n.id === id);
+    if (!note) return;
+    navigator.clipboard.writeText(note.text).then(() => showToast('Copied!', '📋'));
+  }
+
+  // ─── Clear all ──────────────────────────────────────────────────────────────
+  function clearAll() {
+    if (notes.length === 0) { showToast('Nothing to clear!', '🤷'); return; }
+    if (confirm(`Delete all ${notes.length} note(s)? This cannot be undone.`)) {
+      notes = [];
+      saveNotes();
+      renderNotes();
+      showToast('All notes cleared', '🗑');
+    }
+  }
+
+  // ─── Render ─────────────────────────────────────────────────────────────────
+  function renderNotes() {
+    const grid = document.getElementById('notesGrid');
+    const query = document.getElementById('searchInput').value.toLowerCase().trim();
+
+    let filtered = notes.filter(n =>
+      !query || n.text.toLowerCase().includes(query) || n.topic.toLowerCase().includes(query)
+    );
+
+    if (!sortNewest) filtered = [...filtered].reverse();
+
+    document.getElementById('noteCountBadge').textContent = notes.length;
+
+    if (filtered.length === 0) {
+      grid.innerHTML = `
+        <div class="empty-state">
+          <span class="empty-icon">${query ? '🔎' : '📓'}</span>
+          <div class="empty-title">${query ? 'No matching notes' : 'No notes yet!'}</div>
+          <div class="empty-sub">${query ? 'Try a different search term.' : 'Add your first note above to get started.'}</div>
+        </div>`;
+      return;
+    }
+
+    grid.innerHTML = '';
+    filtered.forEach((note, i) => {
+      const card = document.createElement('div');
+      card.className = 'note-card';
+      card.id = 'note-' + note.id;
+      card.style.background = note.color;
+      card.style.animationDelay = (i * 0.04) + 's';
+
+      // subtle rotation variance per note
+      const rot = (((note.id % 9) - 4) * 0.4).toFixed(1);
+      card.style.transform = `rotate(${rot}deg)`;
+      card.onmouseenter = () => card.style.transform = `translateY(-6px) rotate(0.5deg)`;
+      card.onmouseleave = () => card.style.transform = `rotate(${rot}deg)`;
+
+      card.innerHTML = `
+        <div class="note-header">
+          <span class="note-topic">${escapeHtml(note.topic)}</span>
+          <div class="note-actions">
+            <button class="note-action-btn" onclick="copyNote(${note.id})" title="Copy">📋</button>
+            <button class="note-action-btn" onclick="startEdit(${note.id})" title="Edit">✏️</button>
+            <button class="note-action-btn" onclick="deleteNote(${note.id})" title="Delete">✕</button>
+          </div>
+        </div>
+        <div class="note-content">${escapeHtml(note.text)}</div>
+        <div class="note-footer">
+          <span>${formatTime(note.ts)}</span>
+        </div>
+      `;
+      grid.appendChild(card);
+    });
+  }
+
+  function escapeHtml(str) {
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+  }
+
+  // ─── Keyboard shortcut ──────────────────────────────────────────────────────
+  document.getElementById('noteInput').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      addNote();
+    }
+  });
+
+  // ─── Init ───────────────────────────────────────────────────────────────────
+  renderNotes();
+</script>
+</body>
+</html>
